@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ペット用品 楽天アフィリエイトサイト 自動生成 (標準ライブラリのみ)
 内容の追加・変更は content.json を編集してください。"""
-import os, sys, json, time, html, datetime, urllib.request, urllib.parse
+import os, sys, json, time, html, datetime, urllib.request, urllib.parse, urllib.error
 
 HITS = 12
 APP_ID = os.environ.get("RAKUTEN_APP_ID", "")
@@ -9,6 +9,8 @@ ACCESS_KEY = os.environ.get("RAKUTEN_ACCESS_KEY", "")
 AFF_ID = os.environ.get("RAKUTEN_AFFILIATE_ID", "")
 owner, name = os.environ.get("GITHUB_REPOSITORY", "user/repo").split("/")
 SITE_URL = os.environ.get("SITE_URL") or f"https://{owner}.github.io/{name}/"
+_u = urllib.parse.urlsplit(SITE_URL)
+ORIGIN = f"{_u.scheme}://{_u.netloc}"
 API = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701"
 NOW = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 STAMP = NOW.strftime("%Y年%m月%d日")
@@ -30,11 +32,17 @@ def search(kw):
     last = None
     for _ in range(2):
         try:
-            req = urllib.request.Request(url, headers={"Referer": SITE_URL, "User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(url, headers={"Referer": SITE_URL, "Origin": ORIGIN, "User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=20) as r:
                 data = json.load(r)
             items = [i.get("Item", i) for i in data.get("Items", [])]
             return [i for i in items if int(i.get("itemPrice") or 0) > 0]
+        except urllib.error.HTTPError as ex:
+            body = ex.read().decode("utf-8", "replace")[:300]
+            last = f"HTTP {ex.code} {body}"
+            if ex.code in (400, 401, 403, 404):
+                break  # 設定ミスはリトライしても直らない
+            time.sleep(3)
         except Exception as ex:  # noqa
             last = ex
             time.sleep(3)
@@ -189,6 +197,8 @@ def main():
             except Exception as ex:  # noqa
                 print("WARN", ex)
                 failed.append(p["kw"])
+                if not made and len(failed) >= 2 and "HTTP 40" in str(ex):
+                    sys.exit(f"楽天APIに拒否されました。原因: {ex}")
                 continue
             time.sleep(1.2)  # 1秒あたり1リクエスト程度に抑える
             if len(items) < 2:
