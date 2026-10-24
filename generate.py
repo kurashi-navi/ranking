@@ -70,6 +70,21 @@ def clean_name(n):
     return s if len(s) >= 6 else n
 
 
+def tidy(n, limit=36):
+    """キーワード羅列の商品名を、コンパクト表示用に読みやすく整える"""
+    toks = clean_name(n).split()
+    dig = [bool(re.search(r"\d", t)) for t in toks]
+    out, seen = [], set()
+    for i, t in enumerate(toks):
+        if t in seen:
+            continue
+        seen.add(t)
+        if i < 4 or dig[i] or (i + 1 < len(toks) and dig[i + 1]):
+            out.append(t)
+    s = " ".join(out)
+    return short(s if len(s) >= 6 else clean_name(n), limit)
+
+
 def num(v, d=0):
     try:
         return float(v)
@@ -125,9 +140,10 @@ def rich(text):
 
 CSS = """:root{--rf:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
 --bg:#f4faf0;--fg:#243024;--mut:#667564;--card:#fff;--line:#dcebd2;--g:#2a8a45;--g2:#1d6e35;--g3:#eaf6e3;--hd:#2a8a45;
---ac:#e8590c;--cta-fg:#fff;--pr:#d9480f;--mark:#fff0a6}
-@media(prefers-color-scheme:dark){:root{--bg:#131a13;--fg:#eef5ea;--mut:#a9b8a5;--card:#1d261d;--line:#2f3f2f;--g:#4cae67;--g2:#8fd9a2;--g3:#233323;--hd:#1f5e30;--ac:#ff8f4d;--cta-fg:#2b1500;--pr:#ff9b66;--mark:#5a4d12}}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
+--ac:#e8590c;--cta-fg:#fff;--pr:#d9480f;--mark:#fff0a6;--t1:#e6f5dc;--t2:#fff0dc;--t3:#e3f0fb;--sh:0 1px 4px rgba(40,70,40,.10)}
+@media(prefers-color-scheme:dark){:root{--bg:#131a13;--fg:#eef5ea;--mut:#a9b8a5;--card:#1d261d;--line:#2f3f2f;--g:#4cae67;--g2:#8fd9a2;--g3:#233323;--hd:#1f5e30;--ac:#ff8f4d;--cta-fg:#2b1500;--pr:#ff9b66;--mark:#5a4d12;--t1:#26402a;--t2:#4a3520;--t3:#223a50;--sh:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth;scroll-padding-top:64px}
+h1,h2,h3,.lead,.hero2>p,.box{text-wrap:balance}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.8 -apple-system,'Hiragino Sans','Noto Sans JP',sans-serif}
 a{color:var(--g2)}main{max-width:720px;margin:0 auto;padding:0 16px 24px}
 h1,h2,h3{font-family:var(--rf)}
@@ -135,10 +151,11 @@ header.top{background:var(--hd);position:sticky;top:0;z-index:5;box-shadow:0 2px
 header.top div{max-width:720px;margin:0 auto;padding:6px 12px;display:flex;justify-content:space-between;align-items:center;gap:4px}
 header.top a.logo{font-family:var(--rf);font-weight:800;color:#fff;text-decoration:none;font-size:17px;white-space:nowrap}
 header.top nav{display:flex}header.top nav a{display:inline-block;padding:9px 8px;text-decoration:none;font-size:13px;font-weight:700;color:#fff;white-space:nowrap}
-.banner{position:relative;margin:0 -16px;padding:14px 8px 16px;overflow:hidden;
+.banner{position:relative;margin:0 -16px;padding:14px 8px 28px;overflow:hidden;
 background:radial-gradient(circle at 15% 25%,#b8f08f 0,transparent 38%),radial-gradient(circle at 85% 75%,#6fd35c 0,transparent 42%),linear-gradient(135deg,#8ee06a,#38a84a)}
+.banner:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:16px;background:radial-gradient(circle at 12px -5px,transparent 13px,var(--bg) 14px) repeat-x;background-size:24px 16px}
 .row{display:flex;justify-content:center;gap:2%}
-.fr{flex:0 0 22%;aspect-ratio:1;background:#fff;padding:3px 3px 8px;box-shadow:0 3px 8px rgba(0,0,0,.28);transform:rotate(var(--r,0deg))}
+.fr{flex:0 0 22%;aspect-ratio:1;background:#fff;padding:3px 3px 8px;box-shadow:0 3px 8px rgba(0,0,0,.28);outline:1px solid rgba(0,0,0,.06);transform:rotate(var(--r,0deg))}
 .fr img{width:100%;height:100%;object-fit:contain;display:block}
 .strip{position:relative;background:#fff;margin:12px 4px;padding:16px 10px 12px;display:flex;align-items:center;justify-content:center;gap:10px;
 border-radius:46px 60px 50px 64px/34px 40px 36px 42px;transform:rotate(-1.2deg);box-shadow:0 3px 10px rgba(0,0,0,.2);color:#2a8a45}
@@ -155,33 +172,36 @@ border-radius:46px 60px 50px 64px/34px 40px 36px 42px;transform:rotate(-1.2deg);
 .hero2 h1{margin:0 0 8px;font-size:clamp(22px,6.4vw,30px);line-height:1.45}
 .hero2 h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--mark) 60%);padding:0 2px}
 .hero2>p{margin:0;color:var(--mut);font-size:14px}
-.trust{list-style:none;padding:0;margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.trust li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;color:var(--g2)}
+.trust{list-style:none;padding:0;margin:12px 0 16px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.trust li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700;color:var(--g2);white-space:nowrap}
 .cats{display:grid;gap:12px;grid-template-columns:1fr;text-align:left}@media(min-width:600px){.cats{grid-template-columns:1fr 1fr}}
-a.cat{display:block;background:var(--card);border:2px solid var(--g);border-radius:18px;padding:12px;text-decoration:none;color:var(--fg);box-shadow:0 3px 0 var(--g)}
+a.cat{display:block;background:var(--card);border:2px solid var(--g);border-radius:18px;padding:12px;text-decoration:none;color:var(--fg);box-shadow:0 4px 0 var(--g);transition:transform .08s,box-shadow .08s}
+a.cat:active{transform:translateY(3px);box-shadow:0 1px 0 var(--g)}
 .cat-h{display:flex;align-items:center;gap:8px}.cat-h .em{font-size:32px;line-height:1}.cat-h b{font-size:20px;font-family:var(--rf)}.cat-h small{margin-left:auto;font-size:12px;color:var(--mut)}
 .pv{display:flex;gap:10px;align-items:center;margin-top:8px;background:var(--g3);border-radius:12px;padding:8px}
 .pv img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;flex:none}
 .pvt{font-size:12px;line-height:1.5;min-width:0}.pvt i{font-style:normal;font-weight:800;color:var(--g2);display:block}
 .pvt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.pvt u{text-decoration:none;color:var(--mut)}
-.gob{display:block;text-align:center;background:var(--ac);color:var(--cta-fg);font-weight:800;border-radius:999px;padding:11px;margin-top:10px;font-size:15px}
-.icons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
-.ic{display:block;text-align:center;text-decoration:none;color:var(--fg);font-size:11.5px;line-height:1.35;font-weight:700}
-.ic span{display:flex;width:58px;height:58px;margin:0 auto 4px;border-radius:50%;background:var(--card);border:2px solid var(--line);align-items:center;justify-content:center;font-size:27px;box-shadow:0 2px 0 var(--line)}
-.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.steps li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:12px;line-height:1.5;font-weight:700}
+.gob{display:block;box-shadow:0 3px 0 rgba(0,0,0,.18);text-align:center;background:var(--ac);color:var(--cta-fg);font-weight:800;border-radius:999px;padding:11px;margin-top:10px;font-size:15px}
+.icons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 4px}
+.ic{display:block;text-align:center;text-decoration:none;color:var(--fg);font-size:12px;line-height:1.35;font-weight:700}
+.ic span{display:flex;width:54px;height:54px;margin:0 auto 4px;border-radius:50%;background:var(--t1);border:2px solid var(--card);align-items:center;justify-content:center;font-size:26px;box-shadow:0 2px 0 var(--line),var(--sh)}
+.ic.t2 span{background:var(--t2)}.ic.t3 span{background:var(--t3)}.ic:active span{transform:translateY(2px)}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.steps li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 4px 10px;text-align:center;font-size:12.5px;line-height:1.5;font-weight:700;position:relative;box-shadow:var(--sh)}
+.steps li:not(:last-child):after{content:'›';position:absolute;right:-11px;top:34%;color:var(--g);font-weight:800;font-size:20px}
 .steps b{display:block;width:26px;height:26px;line-height:26px;margin:0 auto 4px;border-radius:50%;background:var(--g);color:#fff;font-size:14px}
-h1{font-size:23px;line-height:1.45}h2{font-size:19px;margin:30px 0 10px;padding-left:10px;border-left:6px solid var(--g)}h3{font-size:16px;margin:20px 0 6px}
+h1{font-size:23px;line-height:1.45}h2{font-size:20px;margin:32px 0 12px;padding-left:10px;border-left:6px solid var(--g)}h3{font-size:16px;margin:20px 0 6px}
 .m{font-size:13px;color:var(--mut)}.lead{font-size:16px}
 .box{background:var(--g3);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:14px;line-height:1.7}
 .toc{margin:10px 0}.toc a,.chips a{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;margin:4px 4px 0 0;font-size:14px;text-decoration:none;min-height:40px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-decoration:none;color:var(--fg);display:block}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--sh);text-decoration:none;color:var(--fg);display:block}
 .tile img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:10px}
 .tile .tg{font-size:11px;color:var(--g2);font-weight:800;margin-top:6px;display:block}
 .tile b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.5}
 .tile .pc{color:var(--pr);font-weight:800;font-size:15px;display:block}.tile .m{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0;display:flex;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0;display:flex;gap:12px;box-shadow:var(--sh)}
 .card img{width:104px;height:104px;object-fit:contain;border-radius:10px;background:#fff;flex:none}
 .card .body{flex:1;min-width:0}.card.best{border:2px solid var(--g);flex-direction:column;align-items:center;text-align:center}.card.best img{width:200px;height:200px}
 .card.best .body{width:100%}
@@ -191,7 +211,8 @@ h1{font-size:23px;line-height:1.45}h2{font-size:19px;margin:30px 0 10px;padding-
 .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.55;margin:2px 0}
 .rv{font-size:13px;color:var(--mut);line-height:1.6}.rv b{color:var(--fg)}
 .bd{display:inline-block;font-size:11px;font-weight:700;background:var(--g);color:#fff;border-radius:6px;padding:1px 8px;margin:0 4px 4px 0}
-.btn{display:block;text-align:center;background:var(--ac);color:var(--cta-fg)!important;font-weight:800;padding:13px 16px;border-radius:12px;text-decoration:none;margin-top:10px;min-height:48px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.btn{display:block;text-align:center;background:var(--ac);color:var(--cta-fg)!important;font-weight:800;padding:13px 16px;border-radius:12px;text-decoration:none;margin-top:10px;min-height:48px;box-shadow:0 3px 0 rgba(0,0,0,.18);transition:transform .08s,box-shadow .08s}
+.btn:active,.gob:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
 .prt{font-size:10px;font-weight:700;border:1px solid currentColor;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:middle}
 .tips{list-style:none;counter-reset:t;padding:0}.tips li{counter-increment:t;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 10px 48px;margin:8px 0;position:relative}
 .tips li:before{content:counter(t);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;text-align:center;font-weight:800;line-height:26px}
@@ -267,7 +288,7 @@ def render(cat, p, items, siblings):
         o.append("<h2 id='tips'>失敗しない選び方</h2><ol class='tips'>" + "".join(f"<li>{e(t)}</li>" for t in p["tips"]) + "</ol>"
                  "<p class='m'>ペットの年齢・体質・アレルギーなどには個体差があります。不安がある場合は、獣医師に相談してください。</p>")
     if len(items) >= 3:
-        rows = "".join(f"<tr><td>{n}位 {e(nm(it, 22))}</td><td>{yen(it.get('itemPrice'))}</td>"
+        rows = "".join(f"<tr><td>{n}位 {e(tidy(it.get('itemName', ''), 22))}</td><td>{yen(it.get('itemPrice'))}</td>"
                        f"<td>{num(it.get('reviewAverage')):.2f}点</td><td>{int(num(it.get('reviewCount'))):,}件</td></tr>"
                        for n, it in enumerate(items[:3], 1))
         o.append("<h2 id='compare'>上位3商品の比較</h2><div class='tw'><table><tr><th>商品</th><th>価格</th><th>評価</th><th>レビュー件数</th></tr>"
@@ -383,13 +404,13 @@ def main():
         _, cnt, it, p, _c = max(mine, key=lambda x: x[1])
         cards.append(f"""<a class="cat" href="g-{c['slug']}.html"><span class="cat-h"><span class="em">{c['emoji']}</span><b>{e(c['name'])}</b>
 <small>{len(made[c['slug']])}種類のランキング</small></span><span class="pv"><img src="{e(img_of(it))}" alt="" loading="lazy">
-<span class="pvt"><i>👑 いまレビュー件数が最多</i><span>{e(nm(it, 40))}</span><u>レビュー {int(cnt):,}件</u></span></span>
+<span class="pvt"><i>👑 いまレビュー件数が最多</i><span>{e(tidy(it.get('itemName', ''), 40))}</span><u>レビュー {int(cnt):,}件</u></span></span>
 <span class="gob">{e(c['name'])}ランキングを見る →</span></a>""")
 
     icons = []
     for c in CONF["categories"]:
         if made.get(c["slug"]):
-            cells = "".join(f"<a class='ic' href='{p['slug']}.html'><span>{p.get('icon', '🐾')}</span>{e(p.get('label', p['h1']))}</a>"
+            cells = "".join(f"<a class='ic {'t2' if 'おやつ' in p.get('group', '') else ('t3' if 'トイレ' in p.get('group', '') else 't1')}' href='{p['slug']}.html'><span>{p.get('icon', '🐾')}</span>{e(p.get('label', p['h1']))}</a>"
                             for p, _ in made[c["slug"]])
             icons.append(f"<h3>{c['emoji']}{e(c['name'])}</h3><div class='icons'>{cells}</div>")
 
@@ -398,17 +419,17 @@ def main():
         mine = sorted([x for x in picks if x[0] == c["slug"]], key=lambda x: -x[1])[:3]
         for k, (_, cnt, it, p, _c) in enumerate(mine):
             tiles.append(f"<a class='tile' href='{p['slug']}.html'><img src='{e(img_of(it))}' alt='' loading='lazy'>"
-                         f"<span class='tg'>{'👑' if k == 0 else ''}{c['emoji']}{e(p['h1'])}</span><b>{e(nm(it, 40))}</b>"
+                         f"<span class='tg'>{'👑' if k == 0 else ''}{c['emoji']}{e(p['h1'])}</span><b>{e(tidy(it.get('itemName', ''), 40))}</b>"
                          f"<span class='pc'>{yen(it.get('itemPrice'))}</span>"
                          f"<span class='m'>レビュー {int(cnt):,}件</span></a>")
 
     write("index.html", layout(SITE, f"""<div class="hero2"><span class="ribbon">毎日更新</span>
 <h1>{rich(CONF['hero_title'])}</h1><p>{e(CONF['hero_sub'])}</p>
-<ul class="trust"><li>✔ 毎日自動更新</li><li>✔ レビュー件数で比較</li><li>✔ 選び方つき</li></ul>
+<ul class="trust"><li>✔ レビュー数で比較</li><li>✔ 選び方つき</li><li>✔ 運営方針を公開</li></ul>
 <div class="cats">{''.join(cards)}</div></div>
 <h2>人気カテゴリから探す</h2>{''.join(icons)}
 <h2>かんたん3ステップ</h2>
-<ol class="steps"><li><b>1</b>犬か猫かを選ぶ</li><li><b>2</b>ランキングと選び方をチェック</li><li><b>3</b>楽天市場で価格・在庫を確認</li></ol>
+<ol class="steps"><li><b>1</b>犬か猫を<br>選ぶ</li><li><b>2</b>選び方と<br>順位を見る</li><li><b>3</b>楽天で価格を<br>確認する</li></ol>
 <div class="box">📊 <b>ランキングの見方</b><br>楽天市場のレビュー件数が多い順に、毎日自動で更新しています。順位は人気の目安です。<a href="about.html">選定基準・広告について</a></div>
 <h2>人気商品 TOP6</h2><p class='m'>犬用品・猫用品それぞれで、レビュー件数が特に多い商品です（{STAMP}更新）。</p>
 <div class='grid'>{''.join(tiles)}</div>""", CONF["hero_sub"], banner=banner_html(imgs)))
