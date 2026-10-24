@@ -157,19 +157,19 @@ background:radial-gradient(circle at 15% 25%,#b8f08f 0,transparent 38%),radial-g
 .row{display:flex;justify-content:center;gap:2%}
 .fr{flex:0 0 22%;aspect-ratio:1;background:#fff;padding:3px 3px 8px;box-shadow:0 3px 8px rgba(0,0,0,.28);outline:1px solid rgba(0,0,0,.06);transform:rotate(var(--r,0deg))}
 .fr img{width:100%;height:100%;object-fit:contain;display:block}
-.strip{position:relative;background:#fff;margin:12px 4px;padding:16px 10px 12px;display:flex;align-items:center;justify-content:center;gap:10px;
+.strip{position:relative;background:#fff;margin:22px 4px 14px;padding:22px 10px 12px;display:flex;align-items:center;justify-content:center;gap:10px;
 border-radius:46px 60px 50px 64px/34px 40px 36px 42px;transform:rotate(-1.2deg);box-shadow:0 3px 10px rgba(0,0,0,.2);color:#2a8a45}
 .bowl{font-size:34px}.bt{text-align:center;line-height:1.25}
 .bt b{display:block;font-family:var(--rf);font-size:clamp(28px,9vw,44px);font-weight:800}
 .bt span{display:block;font-family:var(--rf);font-weight:800;font-size:clamp(14px,4.4vw,22px)}
-.crown{position:absolute;top:-4px;right:24%;font-size:20px;transform:rotate(12deg)}
+.crown{position:absolute;top:-14px;right:21%;font-size:24px;line-height:1;transform:rotate(12deg)}
 .paw{font-size:30px;animation:wag 2.4s ease-in-out infinite;transform-origin:50% 80%}
 @keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
 @media(prefers-reduced-motion:reduce){.paw{animation:none}html{scroll-behavior:auto}}
 .pr{font-size:12px;color:var(--mut);background:var(--g3);border-radius:8px;padding:6px 10px;margin:12px 0}
 .hero2{position:relative;background:linear-gradient(160deg,var(--g3),var(--card));border:1px solid var(--line);border-radius:20px;padding:24px 14px 16px;margin:22px 0 14px;text-align:center}
 .ribbon{position:absolute;top:-11px;left:14px;background:var(--ac);color:var(--cta-fg);font-size:12px;font-weight:800;padding:2px 14px;border-radius:999px}
-.hero2 h1{margin:0 0 8px;font-size:clamp(22px,6.4vw,30px);line-height:1.45}
+.hero2 h1{margin:0 0 8px;font-size:clamp(20px,5.6vw,30px);line-height:1.5}
 .hero2 h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--mark) 60%);padding:0 2px}
 .hero2>p{margin:0;color:var(--mut);font-size:14px}
 .trust{list-style:none;padding:0;margin:12px 0 16px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
