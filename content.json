@@ -1,7 +1,7 @@
 {
- "site_name": "ペットごはん・消耗品ランキング",
- "hero_title": "愛犬・愛猫のごはんと消耗品、\n人気順でらくらく比較",
- "hero_sub": "楽天市場のレビュー件数をもとに、毎日自動で更新。選び方のポイントも一緒にチェックできます。",
+ "site_name": "くらしナビ ペット用品ランキング",
+ "hero_title": "愛犬・愛猫の[[定番ごはん]]、\nレビュー数でひと目で比較",
+ "hero_sub": "楽天市場のレビュー件数をもとに、犬・猫用品を毎日ランキング。選び方のポイントつきです。",
  "google_verification": "",
  "about": [
   "当サイトは、楽天市場で販売されているペット用品（フード・おやつ・トイレ用品など）を、人気順に比較できるようにまとめた情報サイトです。",
@@ -40,7 +40,9 @@
       }
      ],
      "group": "フード",
-     "target": "小型犬"
+     "target": "小型犬",
+     "icon": "🥣",
+     "label": "小型犬フード"
     },
     {
      "slug": "puppy-food",
@@ -60,7 +62,9 @@
       }
      ],
      "group": "フード",
-     "target": "子犬"
+     "target": "子犬",
+     "icon": "🍼",
+     "label": "子犬フード"
     },
     {
      "slug": "senior-dogfood",
@@ -80,7 +84,9 @@
       }
      ],
      "group": "フード",
-     "target": "シニア犬"
+     "target": "シニア犬",
+     "icon": "🦮",
+     "label": "シニア犬フード"
     },
     {
      "slug": "dog-treat",
@@ -100,7 +106,9 @@
       }
      ],
      "group": "おやつ・ケア",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🦴",
+     "label": "犬のおやつ"
     },
     {
      "slug": "dog-dental-gum",
@@ -120,7 +128,9 @@
       }
      ],
      "group": "おやつ・ケア",
-     "target": "サイズ別"
+     "target": "サイズ別",
+     "icon": "🪥",
+     "label": "デンタルガム"
     },
     {
      "slug": "pet-sheet",
@@ -140,7 +150,9 @@
       }
      ],
      "group": "トイレ・衛生",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🧻",
+     "label": "ペットシーツ"
     },
     {
      "slug": "dog-shampoo",
@@ -160,7 +172,9 @@
       }
      ],
      "group": "おやつ・ケア",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🛁",
+     "label": "犬シャンプー"
     }
    ]
   },
@@ -188,7 +202,9 @@
       }
      ],
      "group": "フード",
-     "target": "成猫"
+     "target": "成猫",
+     "icon": "🐟",
+     "label": "国産フード"
     },
     {
      "slug": "kitten-food",
@@ -208,7 +224,9 @@
       }
      ],
      "group": "フード",
-     "target": "子猫"
+     "target": "子猫",
+     "icon": "🍼",
+     "label": "子猫フード"
     },
     {
      "slug": "cat-wetfood",
@@ -228,7 +246,9 @@
       }
      ],
      "group": "フード",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🥫",
+     "label": "ウェット"
     },
     {
      "slug": "cat-litter",
@@ -248,7 +268,9 @@
       }
      ],
      "group": "トイレ・衛生",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🪣",
+     "label": "猫砂"
     },
     {
      "slug": "cat-treat",
@@ -268,7 +290,9 @@
       }
      ],
      "group": "おやつ・グッズ",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🍖",
+     "label": "猫のおやつ"
     },
     {
      "slug": "cat-scratcher",
@@ -288,9 +312,13 @@
       }
      ],
      "group": "おやつ・グッズ",
-     "target": "全年齢"
+     "target": "全年齢",
+     "icon": "🐾",
+     "label": "爪とぎ"
     }
    ]
   }
- ]
+ ],
+ "brand": "くらしナビ",
+ "brand_sub": "ペット用品ランキング"
 }
