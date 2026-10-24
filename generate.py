@@ -22,6 +22,8 @@ if not (APP_ID and ACCESS_KEY and AFF_ID):
 
 CONF = json.load(open("content.json", encoding="utf-8"))
 SITE = CONF["site_name"]
+BRAND = CONF.get("brand", SITE)
+BRAND_SUB = CONF.get("brand_sub", "")
 e = html.escape
 
 
@@ -116,53 +118,93 @@ def badges(items):
     return b
 
 
-CSS = """:root{--bg:#fffaf3;--fg:#2b2622;--mut:#7a6f66;--card:#fff;--line:#f0e4d4;--ac:#e8590c;--ac2:#fff1e6;--hero1:#ffe8cc;--hero2:#fff4e6}
-@media(prefers-color-scheme:dark){:root{--bg:#1b1815;--fg:#f4ece4;--mut:#b5a89b;--card:#26221e;--line:#3a332c;--ac:#ff8f4d;--ac2:#33261c;--hero1:#3a2a1d;--hero2:#26221e}}
+def rich(text):
+    """[[強調]] を蛍光ペン風に、改行を<br>に変換"""
+    return e(text).replace("[[", "<em>").replace("]]", "</em>").replace(chr(10), "<br>")
+
+
+CSS = """:root{--rf:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
+--bg:#f4faf0;--fg:#243024;--mut:#667564;--card:#fff;--line:#dcebd2;--g:#2a8a45;--g2:#1d6e35;--g3:#eaf6e3;--hd:#2a8a45;
+--ac:#e8590c;--cta-fg:#fff;--pr:#d9480f;--mark:#fff0a6}
+@media(prefers-color-scheme:dark){:root{--bg:#131a13;--fg:#eef5ea;--mut:#a9b8a5;--card:#1d261d;--line:#2f3f2f;--g:#4cae67;--g2:#8fd9a2;--g3:#233323;--hd:#1f5e30;--ac:#ff8f4d;--cta-fg:#2b1500;--pr:#ff9b66;--mark:#5a4d12}}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.8 -apple-system,'Hiragino Sans','Noto Sans JP',sans-serif}
-a{color:var(--ac)}main{max-width:720px;margin:0 auto;padding:0 16px 24px}
-header.top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-header.top div{max-width:720px;margin:0 auto;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
-header.top a.logo{font-weight:800;color:var(--fg);text-decoration:none}
-header.top nav a{display:inline-block;padding:8px 8px;text-decoration:none;font-size:14px;font-weight:600}
-.pr{font-size:12px;color:var(--mut);background:var(--ac2);border-radius:8px;padding:6px 10px;margin:12px 0}
-.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2));border-radius:20px;padding:24px 16px;margin:16px 0;text-align:center}
-.hero h1{margin:0 0 8px;font-size:23px;line-height:1.45}.hero p{margin:0 0 14px;color:var(--mut);font-size:14px}
-.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.big a{display:block;background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:14px 8px;text-decoration:none;color:var(--fg);font-weight:800;font-size:17px}
-.big a small{display:block;font-weight:500;font-size:12px;color:var(--mut)}.big a span{display:block;font-size:30px;line-height:1.3}
-h1{font-size:23px;line-height:1.45}h2{font-size:19px;margin:30px 0 10px;padding-left:10px;border-left:5px solid var(--ac)}h3{font-size:16px;margin:20px 0 6px}
+a{color:var(--g2)}main{max-width:720px;margin:0 auto;padding:0 16px 24px}
+h1,h2,h3{font-family:var(--rf)}
+header.top{background:var(--hd);position:sticky;top:0;z-index:5;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+header.top div{max-width:720px;margin:0 auto;padding:6px 12px;display:flex;justify-content:space-between;align-items:center;gap:4px}
+header.top a.logo{font-family:var(--rf);font-weight:800;color:#fff;text-decoration:none;font-size:17px;white-space:nowrap}
+header.top nav{display:flex}header.top nav a{display:inline-block;padding:9px 8px;text-decoration:none;font-size:13px;font-weight:700;color:#fff;white-space:nowrap}
+.banner{position:relative;margin:0 -16px;padding:14px 8px 16px;overflow:hidden;
+background:radial-gradient(circle at 15% 25%,#b8f08f 0,transparent 38%),radial-gradient(circle at 85% 75%,#6fd35c 0,transparent 42%),linear-gradient(135deg,#8ee06a,#38a84a)}
+.row{display:flex;justify-content:center;gap:2%}
+.fr{flex:0 0 22%;aspect-ratio:1;background:#fff;padding:3px 3px 8px;box-shadow:0 3px 8px rgba(0,0,0,.28);transform:rotate(var(--r,0deg))}
+.fr img{width:100%;height:100%;object-fit:contain;display:block}
+.strip{position:relative;background:#fff;margin:12px 4px;padding:16px 10px 12px;display:flex;align-items:center;justify-content:center;gap:10px;
+border-radius:46px 60px 50px 64px/34px 40px 36px 42px;transform:rotate(-1.2deg);box-shadow:0 3px 10px rgba(0,0,0,.2);color:#2a8a45}
+.bowl{font-size:34px}.bt{text-align:center;line-height:1.25}
+.bt b{display:block;font-family:var(--rf);font-size:clamp(28px,9vw,44px);font-weight:800}
+.bt span{display:block;font-family:var(--rf);font-weight:800;font-size:clamp(14px,4.4vw,22px)}
+.crown{position:absolute;top:-4px;right:24%;font-size:20px;transform:rotate(12deg)}
+.paw{font-size:30px;animation:wag 2.4s ease-in-out infinite;transform-origin:50% 80%}
+@keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+@media(prefers-reduced-motion:reduce){.paw{animation:none}html{scroll-behavior:auto}}
+.pr{font-size:12px;color:var(--mut);background:var(--g3);border-radius:8px;padding:6px 10px;margin:12px 0}
+.hero2{position:relative;background:linear-gradient(160deg,var(--g3),var(--card));border:1px solid var(--line);border-radius:20px;padding:24px 14px 16px;margin:22px 0 14px;text-align:center}
+.ribbon{position:absolute;top:-11px;left:14px;background:var(--ac);color:var(--cta-fg);font-size:12px;font-weight:800;padding:2px 14px;border-radius:999px}
+.hero2 h1{margin:0 0 8px;font-size:clamp(22px,6.4vw,30px);line-height:1.45}
+.hero2 h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--mark) 60%);padding:0 2px}
+.hero2>p{margin:0;color:var(--mut);font-size:14px}
+.trust{list-style:none;padding:0;margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.trust li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;color:var(--g2)}
+.cats{display:grid;gap:12px;grid-template-columns:1fr;text-align:left}@media(min-width:600px){.cats{grid-template-columns:1fr 1fr}}
+a.cat{display:block;background:var(--card);border:2px solid var(--g);border-radius:18px;padding:12px;text-decoration:none;color:var(--fg);box-shadow:0 3px 0 var(--g)}
+.cat-h{display:flex;align-items:center;gap:8px}.cat-h .em{font-size:32px;line-height:1}.cat-h b{font-size:20px;font-family:var(--rf)}.cat-h small{margin-left:auto;font-size:12px;color:var(--mut)}
+.pv{display:flex;gap:10px;align-items:center;margin-top:8px;background:var(--g3);border-radius:12px;padding:8px}
+.pv img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;flex:none}
+.pvt{font-size:12px;line-height:1.5;min-width:0}.pvt i{font-style:normal;font-weight:800;color:var(--g2);display:block}
+.pvt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.pvt u{text-decoration:none;color:var(--mut)}
+.gob{display:block;text-align:center;background:var(--ac);color:var(--cta-fg);font-weight:800;border-radius:999px;padding:11px;margin-top:10px;font-size:15px}
+.icons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
+.ic{display:block;text-align:center;text-decoration:none;color:var(--fg);font-size:11.5px;line-height:1.35;font-weight:700}
+.ic span{display:flex;width:58px;height:58px;margin:0 auto 4px;border-radius:50%;background:var(--card);border:2px solid var(--line);align-items:center;justify-content:center;font-size:27px;box-shadow:0 2px 0 var(--line)}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.steps li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:12px;line-height:1.5;font-weight:700}
+.steps b{display:block;width:26px;height:26px;line-height:26px;margin:0 auto 4px;border-radius:50%;background:var(--g);color:#fff;font-size:14px}
+h1{font-size:23px;line-height:1.45}h2{font-size:19px;margin:30px 0 10px;padding-left:10px;border-left:6px solid var(--g)}h3{font-size:16px;margin:20px 0 6px}
 .m{font-size:13px;color:var(--mut)}.lead{font-size:16px}
-.box{background:var(--ac2);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:14px;line-height:1.7}
+.box{background:var(--g3);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:14px;line-height:1.7}
 .toc{margin:10px 0}.toc a,.chips a{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;margin:4px 4px 0 0;font-size:14px;text-decoration:none;min-height:40px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-decoration:none;color:var(--fg);display:block}
 .tile img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:10px}
-.tile .tg{font-size:11px;color:var(--ac);font-weight:700;margin-top:6px;display:block}
+.tile .tg{font-size:11px;color:var(--g2);font-weight:800;margin-top:6px;display:block}
 .tile b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.5}
-.tile .pc{color:var(--ac);font-weight:800;font-size:15px;display:block}.tile .m{display:block}
+.tile .pc{color:var(--pr);font-weight:800;font-size:15px;display:block}.tile .m{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0;display:flex;gap:12px}
 .card img{width:104px;height:104px;object-fit:contain;border-radius:10px;background:#fff;flex:none}
-.card .body{flex:1;min-width:0}.card.best{border:2px solid var(--ac);flex-direction:column;align-items:center;text-align:center}.card.best img{width:200px;height:200px}
+.card .body{flex:1;min-width:0}.card.best{border:2px solid var(--g);flex-direction:column;align-items:center;text-align:center}.card.best img{width:200px;height:200px}
 .card.best .body{width:100%}
-.rank{font-weight:800;color:var(--ac)}.price{font-weight:800;font-size:19px;line-height:1.5}.st{color:#f59f00;letter-spacing:1px}
+.medal{display:inline-block;min-width:48px;text-align:center;border-radius:999px;padding:0 10px;color:#fff;font-weight:800;font-size:14px;margin-bottom:2px}
+.m1{background:linear-gradient(135deg,#f5b400,#e08a00)}.m2{background:linear-gradient(135deg,#a7b0b8,#7d8790)}.m3{background:linear-gradient(135deg,#c98a55,#a2602f)}.m4{background:var(--g)}
+.price{font-weight:800;font-size:19px;line-height:1.5;color:var(--pr)}.st{color:#f59f00;letter-spacing:1px}
 .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.55;margin:2px 0}
 .rv{font-size:13px;color:var(--mut);line-height:1.6}.rv b{color:var(--fg)}
-.bd{display:inline-block;font-size:11px;font-weight:700;background:var(--ac);color:#fff;border-radius:6px;padding:1px 8px;margin:0 4px 4px 0}
-.btn{display:block;text-align:center;background:var(--ac);color:#fff!important;font-weight:800;padding:13px 16px;border-radius:12px;text-decoration:none;margin-top:10px;min-height:48px}
-.prt{font-size:10px;font-weight:700;border:1px solid #fff;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:middle}
+.bd{display:inline-block;font-size:11px;font-weight:700;background:var(--g);color:#fff;border-radius:6px;padding:1px 8px;margin:0 4px 4px 0}
+.btn{display:block;text-align:center;background:var(--ac);color:var(--cta-fg)!important;font-weight:800;padding:13px 16px;border-radius:12px;text-decoration:none;margin-top:10px;min-height:48px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.prt{font-size:10px;font-weight:700;border:1px solid currentColor;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:middle}
 .tips{list-style:none;counter-reset:t;padding:0}.tips li{counter-increment:t;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 10px 48px;margin:8px 0;position:relative}
-.tips li:before{content:counter(t);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;text-align:center;font-weight:800;line-height:26px}
-.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5}th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}th{background:var(--ac2)}
+.tips li:before{content:counter(t);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;text-align:center;font-weight:800;line-height:26px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5}th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}th{background:var(--g3)}
 details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}summary{font-weight:700;cursor:pointer;min-height:32px}
 .cc{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;text-decoration:none;color:var(--fg)}
-.cc b{display:block;font-size:17px}.cc .go{color:var(--ac);font-weight:700;font-size:14px;display:block;margin-top:4px}
-.tgt{display:inline-block;font-size:11px;font-weight:700;color:var(--ac);border:1px solid var(--ac);border-radius:999px;padding:0 8px;margin-bottom:4px}
+.cc b{display:block;font-size:17px}.cc .go{color:var(--g2);font-weight:700;font-size:14px;display:block;margin-top:4px}
+.tgt{display:inline-block;font-size:11px;font-weight:700;color:var(--g2);border:1px solid var(--g);border-radius:999px;padding:0 8px;margin-bottom:4px}
 .up{text-align:center;margin:24px 0 0}.up a{display:inline-block;padding:10px 20px;border:1px solid var(--line);border-radius:999px;text-decoration:none;background:var(--card)}
 footer{font-size:12px;color:var(--mut);margin:36px 0 12px;border-top:1px solid var(--line);padding-top:14px}"""
 
 
-def layout(title, body, desc=""):
+def layout(title, body, desc="", banner=""):
     gv = CONF.get("google_verification", "")
     meta_gv = f'<meta name="google-site-verification" content="{e(gv)}">' if gv else ""
     nav = "".join(f'<a href="g-{c["slug"]}.html">{c["emoji"]}{e(c["name"])}</a>' for c in CONF["categories"])
@@ -170,24 +212,31 @@ def layout(title, body, desc=""):
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(title)}</title>
 <meta name="description" content="{e(desc)}"><meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc)}"><meta property="og:type" content="website">
-<meta name="theme-color" content="#e8590c">{meta_gv}<style>{CSS}</style></head><body id="top">
-<header class="top"><div><a class="logo" href="index.html">🐾 {e(SITE)}</a><nav>{nav}<a href="about.html">運営方針</a></nav></div></header>
-<main><p class="pr">【PR】本ページは広告（楽天アフィリエイト）を含みます。</p>{body}
+<meta name="theme-color" content="#2a8a45">{meta_gv}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+<style>{CSS}</style></head><body id="top">
+<header class="top"><div><a class="logo" href="index.html">🐾 {e(BRAND)}</a><nav>{nav}<a href="about.html">運営方針</a></nav></div></header>
+<main>{banner}<p class="pr">【PR】本ページは広告（楽天アフィリエイト）を含みます。</p>{body}
 <p class="up"><a href="#top">↑ ページ上部へ</a></p>
 <footer>価格・在庫・レビュー件数は{STAMP_T}（日本時間）に自動取得した情報です。購入前に、楽天市場の各商品ページで最新の情報をご確認ください。<br>
 <a href="about.html">選定基準・広告について（運営方針）</a></footer></main></body></html>"""
+
+
+def medal(n):
+    return f'<span class="medal m{n if n <= 3 else 4}">{"👑" if n == 1 else ""}{n}位</span>'
 
 
 def product_card(it, n, bd, best=False):
     img = img_of(it)
     im = f'<img src="{e(img)}" alt="{e(nm(it, 40))}" loading="lazy">' if img else ""
     bs = "".join(f'<span class="bd">{e(x)}</span>' for x in bd if not (best and x == "レビュー件数 No.1"))
-    label = "レビュー件数 No.1" if best else f"{n}位"
+    label = '<span class="medal m1">👑 レビュー件数 No.1</span>' if best else medal(n)
     avg, cnt = num(it.get("reviewAverage")), int(num(it.get("reviewCount")))
     rv = (f'<span class="st">{stars(avg)}</span> 評価：<b>{avg:.2f}点</b>' if avg > 0 else "評価：なし") + \
          f' ／ レビュー件数：<b>{cnt:,}件</b>'
     return f"""<div class="card{' best' if best else ''}">{im}<div class="body">
-<div class="rank">{label}</div>{bs}<div class="nm">{e(nm(it))}</div>
+<div>{label}</div>{bs}<div class="nm">{e(nm(it))}</div>
 <div class="price">{yen(it.get('itemPrice'))}</div>
 <div class="rv">{rv}<br>{e(it.get('shopName', ''))}</div>
 <a class="btn" href="{e(link_of(it))}" rel="nofollow sponsored noopener" target="_blank">楽天市場で価格・在庫を見る<span class="prt">PR</span></a></div></div>"""
@@ -198,7 +247,7 @@ def render(cat, p, items, siblings):
     top_i = max(range(len(items)), key=lambda i: num(items[i].get("reviewCount")))
     prices = [int(num(i.get("itemPrice"))) for i in items]
     o = [f"<p class='m'><a href='index.html'>トップ</a> › <a href='g-{cat['slug']}.html'>{cat['emoji']}{e(cat['name'])}</a></p>",
-         f"<h1>{e(p['h1'])} 人気ランキング</h1>",
+         f"<h1>{p.get('icon', '')} {e(p['h1'])} 人気ランキング</h1>",
          f"<p class='lead'>{e(p.get('lead', ''))}</p>",
          f"<div class='box'>📊 <b>ランキングの見方</b><br>楽天市場で「{e(p['kw'])}」を検索し、<b>レビュー件数が多い順</b>に表示しています。"
          "順位は人気の目安で、評価の高さや価格の安さを示すものではありません。評価点とレビュー件数は、商品ごとに別々に表示しています。"
@@ -252,6 +301,16 @@ def groups_of(pages):
     return [(g, d[g]) for g in order]
 
 
+def banner_html(imgs):
+    def fr(u, i):
+        return f'<div class="fr" style="--r:{(-4, 3, -2, 5)[i % 4]}deg"><img src="{e(u)}" alt="" loading="eager"></div>'
+    top = "".join(fr(u, i) for i, u in enumerate(imgs[:4]))
+    bot = "".join(fr(u, i + 2) for i, u in enumerate(imgs[4:8]))
+    return (f'<section class="banner"><div class="row">{top}</div><div class="strip"><span class="bowl">🥣</span>'
+            f'<div class="bt"><b>{e(BRAND)}</b><span>{e(BRAND_SUB)}</span></div><span class="crown">👑</span><span class="paw">🐾</span></div>'
+            f'<div class="row">{bot}</div></section>')
+
+
 def write(path, text):
     open(f"_site/{path}", "w", encoding="utf-8").write(text)
 
@@ -294,7 +353,7 @@ def main():
                 body.append(f"<h2>{e(g)}</h2>")
                 for p in ps:
                     body.append(f"<a class='cc' href='{p['slug']}.html'><span class='tgt'>対象：{e(p.get('target', '全般'))}</span>"
-                                f"<b>{e(p['h1'])} 人気ランキング</b><span class='m'>{e(p.get('lead', ''))}</span>"
+                                f"<b>{p.get('icon', '')} {e(p['h1'])} 人気ランキング</b><span class='m'>{e(p.get('lead', ''))}</span>"
                                 f"<span class='go'>ランキングを見る →</span></a>")
             body.append("<h2>ほかのカテゴリ</h2><div class='chips'>" + "".join(
                 f"<a href='g-{x['slug']}.html'>{x['emoji']}{e(x['name'])}の一覧</a>" for x in CONF["categories"] if x["slug"] != c["slug"])
@@ -302,30 +361,57 @@ def main():
             write(f"g-{c['slug']}.html", layout(f"{c['name']}の人気ランキング｜{SITE}", "".join(body), c.get("desc", "")))
             urls.append(f"{SITE_URL}g-{c['slug']}.html")
 
-    # トップページ
-    big = "".join(f"<a href='g-{c['slug']}.html'><span>{c['emoji']}</span>{e(c['name'])}を探す"
-                  f"<small>{len(made[c['slug']])}種類のランキング</small></a>" for c in CONF["categories"] if made.get(c["slug"]))
+    # トップページ: バナー用の商品写真（犬・猫を交互に最大8枚）
+    lists = []
+    for c in CONF["categories"]:
+        l = [x for x in picks if x[0] == c["slug"]]
+        lists.append(l[0::2] + l[1::2])
+    imgs, i = [], 0
+    while len(imgs) < 8 and any(i < len(l) for l in lists):
+        for l in lists:
+            if i < len(l) and len(imgs) < 8:
+                u = img_of(l[i][2])
+                if u and u not in imgs:
+                    imgs.append(u)
+        i += 1
+
+    cards = []
+    for c in CONF["categories"]:
+        mine = [x for x in picks if x[0] == c["slug"]]
+        if not mine:
+            continue
+        _, cnt, it, p, _c = max(mine, key=lambda x: x[1])
+        cards.append(f"""<a class="cat" href="g-{c['slug']}.html"><span class="cat-h"><span class="em">{c['emoji']}</span><b>{e(c['name'])}</b>
+<small>{len(made[c['slug']])}種類のランキング</small></span><span class="pv"><img src="{e(img_of(it))}" alt="" loading="lazy">
+<span class="pvt"><i>👑 いまレビュー件数が最多</i><span>{e(nm(it, 40))}</span><u>レビュー {int(cnt):,}件</u></span></span>
+<span class="gob">{e(c['name'])}ランキングを見る →</span></a>""")
+
+    icons = []
+    for c in CONF["categories"]:
+        if made.get(c["slug"]):
+            cells = "".join(f"<a class='ic' href='{p['slug']}.html'><span>{p.get('icon', '🐾')}</span>{e(p.get('label', p['h1']))}</a>"
+                            for p, _ in made[c["slug"]])
+            icons.append(f"<h3>{c['emoji']}{e(c['name'])}</h3><div class='icons'>{cells}</div>")
+
     tiles = []
     for c in CONF["categories"]:
         mine = sorted([x for x in picks if x[0] == c["slug"]], key=lambda x: -x[1])[:3]
-        for _, cnt, it, p, _c in mine:
+        for k, (_, cnt, it, p, _c) in enumerate(mine):
             tiles.append(f"<a class='tile' href='{p['slug']}.html'><img src='{e(img_of(it))}' alt='' loading='lazy'>"
-                         f"<span class='tg'>{c['emoji']}{e(p['h1'])}</span><b>{e(nm(it, 40))}</b>"
+                         f"<span class='tg'>{'👑' if k == 0 else ''}{c['emoji']}{e(p['h1'])}</span><b>{e(nm(it, 40))}</b>"
                          f"<span class='pc'>{yen(it.get('itemPrice'))}</span>"
                          f"<span class='m'>レビュー {int(cnt):,}件</span></a>")
-    sections = []
-    for c in CONF["categories"]:
-        if made.get(c["slug"]):
-            sections.append(f"<h2>{c['emoji']}{e(c['name'])}</h2>")
-            for g, ps in groups_of([p for p, _ in made[c["slug"]]]):
-                chips = "".join(f"<a href='{p['slug']}.html'>{e(p['h1'])}</a>" for p in ps)
-                sections.append(f"<h3>{e(g)}</h3><div class='chips'>{chips}</div>")
-    write("index.html", layout(SITE, f"""<div class="hero"><h1>{e(CONF['hero_title']).replace(chr(10), '<br>')}</h1>
-<p>{e(CONF['hero_sub'])}</p><div class="big">{big}</div></div>
+
+    write("index.html", layout(SITE, f"""<div class="hero2"><span class="ribbon">毎日更新</span>
+<h1>{rich(CONF['hero_title'])}</h1><p>{e(CONF['hero_sub'])}</p>
+<ul class="trust"><li>✔ 毎日自動更新</li><li>✔ レビュー件数で比較</li><li>✔ 選び方つき</li></ul>
+<div class="cats">{''.join(cards)}</div></div>
+<h2>人気カテゴリから探す</h2>{''.join(icons)}
+<h2>かんたん3ステップ</h2>
+<ol class="steps"><li><b>1</b>犬か猫かを選ぶ</li><li><b>2</b>ランキングと選び方をチェック</li><li><b>3</b>楽天市場で価格・在庫を確認</li></ol>
 <div class="box">📊 <b>ランキングの見方</b><br>楽天市場のレビュー件数が多い順に、毎日自動で更新しています。順位は人気の目安です。<a href="about.html">選定基準・広告について</a></div>
 <h2>人気商品 TOP6</h2><p class='m'>犬用品・猫用品それぞれで、レビュー件数が特に多い商品です（{STAMP}更新）。</p>
-<div class='grid'>{''.join(tiles)}</div>
-<h2 style="margin-top:36px">目的から探す</h2>{''.join(sections)}""", CONF["hero_sub"]))
+<div class='grid'>{''.join(tiles)}</div>""", CONF["hero_sub"], banner=banner_html(imgs)))
 
     about = "".join(f"<p>{e(t)}</p>" for t in CONF["about"])
     write("about.html", layout(f"運営方針・広告表示｜{SITE}", f"<h1>運営方針・広告表示について</h1>{about}"))
